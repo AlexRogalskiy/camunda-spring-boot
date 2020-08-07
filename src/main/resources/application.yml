@@ -23,3 +23,11 @@ spring:
   jpa:
       hibernate:
         ddl-auto: update
+camunda:
+  bpm:
+    admin-user:
+      password: demo
+      id: demo
+      first-name: Demo
+      last-name: Demo
+      email: info@reunico.com
