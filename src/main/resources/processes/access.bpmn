@@ -2,11 +2,11 @@
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:bioc="http://bpmn.io/schema/bpmn/biocolor/1.0" id="Definitions_05yd4j2" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.1.1">
   <bpmn:collaboration id="Collaboration_1y6khm4">
     <bpmn:participant id="Participant_17tghh4" name="Запрос предоставления доступа" processRef="access" />
-    <bpmn:participant id="Participant_12wxi95" name="Рассмотрение предоставления доступа" processRef="Process_0nwicon" />
+    <bpmn:participant id="Participant_12wxi95" name="Рассмотрение предоставления доступа" processRef="approve" />
     <bpmn:messageFlow id="Flow_04ij7bl" sourceRef="Event_1j1x5ji" targetRef="Event_0gpd48d" />
     <bpmn:messageFlow id="Flow_0r1za9f" sourceRef="Event_03uihrb" targetRef="Event_0ksblc0" />
   </bpmn:collaboration>
-  <bpmn:process id="access" name="Предоставление доступа" isExecutable="true">
+  <bpmn:process id="access" name="Запрос предоставления доступа" isExecutable="true">
     <bpmn:laneSet id="LaneSet_0fqntog">
       <bpmn:lane id="Lane_0x1yfuw" name="Пользователь">
         <bpmn:flowNodeRef>Event_1e9sejc</bpmn:flowNodeRef>
@@ -16,15 +16,16 @@
         <bpmn:flowNodeRef>Activity_1nji1cd</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_01deh34</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Event_0ksblc0</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Event_1j1x5ji</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Activity_0xsj9r9</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_1j1x5ji</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
     <bpmn:startEvent id="Event_1e9sejc" name="Нужен доступ к сущности" camunda:initiator="initiator">
       <bpmn:extensionElements>
-        <camunda:formData>
+        <camunda:formData businessKey="applicationId">
           <camunda:formField id="entityId" label="Идентификатор сущности" type="long" />
           <camunda:formField id="username" label="Имя пользователя" type="string" defaultValue="${ currentUser() }" />
+          <camunda:formField id="applicationId" label="Номер заявления" type="string" />
         </camunda:formData>
       </bpmn:extensionElements>
       <bpmn:outgoing>Flow_153otsc</bpmn:outgoing>
@@ -51,13 +52,10 @@
       <bpmn:outgoing>Flow_136id1q</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:intermediateCatchEvent id="Event_0ksblc0">
+      <bpmn:incoming>Flow_0dpy85r</bpmn:incoming>
       <bpmn:outgoing>Flow_0rfulgj</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_1nphv6m" messageRef="Message_1j9ztqq" />
     </bpmn:intermediateCatchEvent>
-    <bpmn:endEvent id="Event_1j1x5ji">
-      <bpmn:incoming>Flow_1mrqd3a</bpmn:incoming>
-      <bpmn:messageEventDefinition id="MessageEventDefinition_1al0c9j" messageRef="Message_13e9xw6" camunda:delegateExpression="${ sendAccessRequest }" />
-    </bpmn:endEvent>
     <bpmn:serviceTask id="Activity_0xsj9r9" name="Создать запись доступа" camunda:delegateExpression="${ createAccessRequest }">
       <bpmn:incoming>Flow_153otsc</bpmn:incoming>
       <bpmn:outgoing>Flow_1mrqd3a</bpmn:outgoing>
@@ -74,8 +72,14 @@
     <bpmn:sequenceFlow id="Flow_15hppst" sourceRef="Gateway_1knnds5" targetRef="Event_0sf14gc" />
     <bpmn:sequenceFlow id="Flow_1mrqd3a" sourceRef="Activity_0xsj9r9" targetRef="Event_1j1x5ji" />
     <bpmn:sequenceFlow id="Flow_0rfulgj" sourceRef="Event_0ksblc0" targetRef="Gateway_01deh34" />
+    <bpmn:sequenceFlow id="Flow_0dpy85r" sourceRef="Event_1j1x5ji" targetRef="Event_0ksblc0" />
+    <bpmn:intermediateThrowEvent id="Event_1j1x5ji">
+      <bpmn:incoming>Flow_1mrqd3a</bpmn:incoming>
+      <bpmn:outgoing>Flow_0dpy85r</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0m38654" messageRef="Message_13e9xw6" camunda:delegateExpression="${ sendAccessRequest }" />
+    </bpmn:intermediateThrowEvent>
   </bpmn:process>
-  <bpmn:process id="Process_0nwicon" isExecutable="false">
+  <bpmn:process id="approve" name="Рассмотрение предоставления доступа" isExecutable="true" camunda:isStartableInTasklist="false">
     <bpmn:startEvent id="Event_0gpd48d">
       <bpmn:outgoing>Flow_1lqzkej</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_0m2axsg" messageRef="Message_13e9xw6" />
@@ -147,11 +151,15 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1mrqd3a_di" bpmnElement="Flow_1mrqd3a">
         <di:waypoint x="450" y="270" />
-        <di:waypoint x="450" y="352" />
+        <di:waypoint x="450" y="372" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0rfulgj_di" bpmnElement="Flow_0rfulgj">
         <di:waypoint x="840" y="372" />
         <di:waypoint x="840" y="335" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0dpy85r_di" bpmnElement="Flow_0dpy85r">
+        <di:waypoint x="468" y="390" />
+        <di:waypoint x="822" y="390" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Event_1e9sejc_di" bpmnElement="Event_1e9sejc" bioc:stroke="#000" bioc:fill="#fff">
         <dc:Bounds x="262" y="212" width="36" height="36" />
@@ -177,11 +185,11 @@
       <bpmndi:BPMNShape id="Event_19n4x64_di" bpmnElement="Event_0ksblc0">
         <dc:Bounds x="822" y="372" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1fbr0ov_di" bpmnElement="Event_1j1x5ji">
-        <dc:Bounds x="432" y="352" width="36" height="36" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0z06d4k_di" bpmnElement="Activity_0xsj9r9">
         <dc:Bounds x="400" y="190" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0s0d1vv_di" bpmnElement="Event_1j1x5ji">
+        <dc:Bounds x="432" y="372" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Participant_12wxi95_di" bpmnElement="Participant_12wxi95" isHorizontal="true">
         <dc:Bounds x="160" y="680" width="780" height="250" />
@@ -211,7 +219,7 @@
         <dc:Bounds x="822" y="792" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_04ij7bl_di" bpmnElement="Flow_04ij7bl">
-        <di:waypoint x="450" y="388" />
+        <di:waypoint x="450" y="408" />
         <di:waypoint x="450" y="792" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0r1za9f_di" bpmnElement="Flow_0r1za9f">

@@ -5,4 +5,6 @@ public interface ProcessVariablesConstants {
     String APPROVE = "approve";
     String USER_NAME = "username";
     String REQUEST_ID = "requestId";
+    String APPROVER = "approver";
+    String APPLICATION_ID = "applicationId";
 }
