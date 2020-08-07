@@ -28,7 +28,7 @@
       </bpmn:extensionElements>
       <bpmn:outgoing>Flow_153otsc</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:serviceTask id="Activity_0xsj9r9" name="Создать запись доступа" camunda:expression="${true}">
+    <bpmn:serviceTask id="Activity_0xsj9r9" name="Создать запись доступа" camunda:delegateExpression="${ createAccessRequest }">
       <bpmn:incoming>Flow_153otsc</bpmn:incoming>
       <bpmn:outgoing>Flow_0k04k2r</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -47,7 +47,7 @@
       <bpmn:incoming>Flow_0k04k2r</bpmn:incoming>
       <bpmn:outgoing>Flow_1dyx3sj</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:serviceTask id="Activity_1p7qjsk" name="Обновить запись доступа" camunda:expression="${ true }">
+    <bpmn:serviceTask id="Activity_1p7qjsk" name="Обновить запись доступа" camunda:delegateExpression="${ updateAccessRequest }">
       <bpmn:incoming>Flow_1dyx3sj</bpmn:incoming>
       <bpmn:outgoing>Flow_0r4onnq</bpmn:outgoing>
     </bpmn:serviceTask>
